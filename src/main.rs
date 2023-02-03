@@ -1,4 +1,8 @@
-use copypasta::{ClipboardContext, ClipboardProvider};
+use copypasta_ext::prelude::ClipboardProvider;
+#[cfg(feature = "x11-fork")]
+use copypasta_ext::x11_fork::ClipboardContext;
+#[cfg(feature = "x11-bin")]
+use copypasta_ext::x11_bin::ClipboardContext;
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use image::{io::Reader, ImageFormat};
@@ -25,7 +29,7 @@ fn main() {
 
     let (r, g, b) = get_pixel_colour(coordinates);
 
-    let rgb_hex = format!("#{r:X}{g:X}{b:X}");
+    let rgb_hex = format!("#{r:02X}{g:02X}{b:02X}");
 
     print_result((r, g, b), &rgb_hex);
 
@@ -89,9 +93,9 @@ fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
         .decode()
         .unwrap();
 
-    let pixel = image.as_rgba8().unwrap().pixels().next().unwrap();
+    let pixel = image.as_rgba8().unwrap().pixels().next().unwrap().0;
 
-    (pixel.0[0], pixel.0[1], pixel.0[2])
+    (pixel[0], pixel[1], pixel[2])
 }
 
 fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
@@ -107,4 +111,6 @@ fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
     stdout.write(rgb_hex.as_bytes()).unwrap();
 
     stdout.reset().unwrap();
+
+    stdout.flush().unwrap();
 }

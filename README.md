@@ -10,3 +10,12 @@ You can install it by running `cargo install crabdropper-cli`
 - [x] MacOS (untested)
 - [x] Linux (X11)
 - [ ] Linux (Wayland)
+
+## Cargo Features
+Mouse Tracking:
+- [device_query](https://crates.io/crates/device_query) (default)
+- [mouce](https://crates.io/crates/mouce)
+
+Clipboard Managment:
+- x11-fork (default)
+- x11-bin (requires `xclip`/`xsel`)
