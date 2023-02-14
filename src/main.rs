@@ -1,14 +1,16 @@
+#![warn(clippy::all, clippy::pedantic, clippy::nursery)]
+
 use copypasta_ext::prelude::ClipboardProvider;
-#[cfg(feature = "x11-fork")]
-use copypasta_ext::x11_fork::ClipboardContext;
 #[cfg(feature = "x11-bin")]
 use copypasta_ext::x11_bin::ClipboardContext;
+#[cfg(feature = "x11-fork")]
+use copypasta_ext::x11_fork::ClipboardContext;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use screenshots::Screen;
+use image::ImageFormat;
+use std::io::Write;
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
-use image::{io::Reader, ImageFormat};
-use screenshots::Screen;
-use std::io::{Cursor, Write};
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 #[cfg(feature = "mouce")]
 use {
     mouce::{
@@ -19,12 +21,9 @@ use {
 };
 
 fn main() {
-    let coordinates = match request_pixel_position() {
-        Some(x) => x,
-        None => {
-            println!("Ending program");
-            return;
-        }
+    let Some(coordinates) = request_pixel_position() else {
+        println!("Ending program");
+        return;
     };
 
     let (r, g, b) = get_pixel_colour(coordinates);
@@ -46,11 +45,11 @@ fn request_pixel_position() -> Option<(i32, i32)> {
     loop {
         let mouse: MouseState = device_state.get_mouse();
 
-        if mouse.button_pressed[1] == true {
+        if mouse.button_pressed[1] {
             return Some(mouse.coords);
         }
 
-        if mouse.button_pressed[3] == true {
+        if mouse.button_pressed[3] {
             return None;
         }
     }
@@ -87,11 +86,7 @@ fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
 
     let screenshot = screen.capture_area(x, y, 1, 1).unwrap();
 
-    let stream = Cursor::new(screenshot.buffer());
-
-    let image = Reader::with_format(stream, ImageFormat::Png)
-        .decode()
-        .unwrap();
+    let image = image::load_from_memory_with_format(screenshot.buffer(), ImageFormat::Png).unwrap();
 
     let pixel = image.as_rgba8().unwrap().pixels().next().unwrap().0;
 
@@ -108,7 +103,7 @@ fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
         )
         .unwrap();
 
-    stdout.write(rgb_hex.as_bytes()).unwrap();
+    stdout.write_all(rgb_hex.as_bytes()).unwrap();
 
     stdout.reset().unwrap();
 
