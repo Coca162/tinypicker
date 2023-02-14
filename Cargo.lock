@@ -147,7 +147,7 @@ dependencies = [
 
 [[package]]
 name = "crabdropper-cli"
-version = "0.1.3"
+version = "0.2.0"
 dependencies = [
  "copypasta-ext",
  "device_query",

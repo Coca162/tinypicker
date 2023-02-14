@@ -1,16 +1,15 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
-use copypasta_ext::prelude::ClipboardProvider;
-#[cfg(feature = "x11-bin")]
-use copypasta_ext::x11_bin::ClipboardContext;
-#[cfg(feature = "x11-fork")]
-use copypasta_ext::x11_fork::ClipboardContext;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
-use screenshots::Screen;
-use image::ImageFormat;
-use std::io::Write;
+use copypasta_ext::{
+    prelude::ClipboardProvider, x11_bin::ClipboardContext as BinClipboardContext,
+    x11_fork::ClipboardContext as ForkClipboardContext,
+};
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
+use image::ImageFormat;
+use screenshots::Screen;
+use std::io::Write;
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 #[cfg(feature = "mouce")]
 use {
     mouce::{
@@ -32,10 +31,7 @@ fn main() {
 
     print_result((r, g, b), &rgb_hex);
 
-    ClipboardContext::new()
-        .unwrap()
-        .set_contents(rgb_hex)
-        .unwrap();
+    send_to_clibpoard(&rgb_hex);
 }
 
 #[cfg(feature = "device_query")]
@@ -108,4 +104,20 @@ fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
     stdout.reset().unwrap();
 
     stdout.flush().unwrap();
+}
+
+fn send_to_clibpoard(rgb_hex: &str) {
+    let bin_result =
+        BinClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+
+    if let Err(err) = bin_result {
+        eprintln!("{err} Could not use xclip, attempting fork");
+    }
+
+    let fork_result =
+        ForkClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+
+    if let Err(err) = fork_result {
+        eprintln!("Fork clipboard method failed: {err}");
+    }
 }
