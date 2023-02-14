@@ -112,6 +112,8 @@ fn send_to_clibpoard(rgb_hex: &str) {
 
     if let Err(err) = bin_result {
         eprintln!("{err} Could not use xclip, attempting fork");
+    } else {
+        return;
     }
 
     let fork_result =
