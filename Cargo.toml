@@ -1,10 +1,10 @@
 [package]
-name = "crabdropper-cli"
-version = "0.2.2"
+name = "tinypicker"
+version = "0.2.3"
 edition = "2021"
 license = "AGPL-3.0-only"
 readme = "README.md"
-repository = "https://github.com/Coca162/crabdropper-cli"
+repository = "https://github.com/Coca162/tinypicker"
 categories = ["command-line-utilities"]
 keywords = ["x11", "color-picker", "cli", "utility", "color"]
 description = " A simple color picker made in rust for the CLI!"
