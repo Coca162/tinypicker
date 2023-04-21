@@ -17,7 +17,7 @@ screenshots = "0.5.2"
 device_query = { version = "1.1.2", optional = true }
 mouce = { version = "0.2.41", optional = true }
 termcolor = "1.2.0"
-copypasta-ext = { version = "0.4.1", default-features = false, features = ["x11-fork", "x11-bin"] }
+copypasta-ext = { version = "0.4.4", default-features = false, features = ["x11-fork", "x11-bin"] }
 
 [features]
 default = ["device_query"]
