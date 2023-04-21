@@ -1,9 +1,6 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
-use copypasta_ext::{
-    prelude::ClipboardProvider, x11_bin::ClipboardContext as BinClipboardContext,
-    x11_fork::ClipboardContext as ForkClipboardContext,
-};
+use copypasta_ext::prelude::ClipboardProvider;
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use image::ImageFormat;
@@ -107,19 +104,32 @@ fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
 }
 
 fn send_to_clibpoard(rgb_hex: &str) {
-    let bin_result =
-        BinClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+    #[cfg(unix)]
+    {
+        use copypasta_ext::{
+            x11_bin::ClipboardContext as BinClipboardContext,
+            x11_fork::ClipboardContext as ForkClipboardContext,
+        };
 
-    if let Err(err) = bin_result {
-        eprintln!("{err} Could not use xclip, attempting fork");
-    } else {
-        return;
+        let bin_result =
+            BinClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+
+        if let Err(err) = bin_result {
+            eprintln!("{err} Could not use xclip, attempting fork");
+        } else {
+            return;
+        }
+
+        let fork_result =
+            ForkClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+
+        if let Err(err) = fork_result {
+            eprintln!("Fork clipboard method failed: {err}");
+        }
     }
 
-    let fork_result =
-        ForkClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
-
-    if let Err(err) = fork_result {
-        eprintln!("Fork clipboard method failed: {err}");
-    }
+    #[cfg(not(unix))]
+    copypasta_ext::display::DisplayServer::select()
+        .try_context()
+        .and_then(|mut x| x.set_contents(rgb_hex.to_string()))
 }
