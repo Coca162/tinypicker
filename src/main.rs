@@ -88,7 +88,7 @@ fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
 }
 
 fn print_color_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
-    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    let mut stdout = StandardStream::stdout(ColorChoice::Auto);
     stdout
         .set_color(
             ColorSpec::new()
