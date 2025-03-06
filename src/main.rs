@@ -98,9 +98,8 @@ fn print_color_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
         .unwrap();
 
     stdout.write_all(rgb_hex.as_bytes()).unwrap();
-    stdout.write_all(b"\n").unwrap();
-
     stdout.reset().unwrap();
+    stdout.write_all(b"\n").unwrap();
 
     stdout.flush().unwrap();
 }
