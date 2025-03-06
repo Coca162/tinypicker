@@ -79,7 +79,10 @@ fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
 
     let screenshot = screen.capture_image().unwrap();
 
-    let pixel = screenshot.get_pixel(x.try_into().unwrap(), y.try_into().unwrap());
+    let pixel = screenshot.get_pixel(
+        (x - screen.x().unwrap()).try_into().unwrap(),
+        (y - screen.y().unwrap()).try_into().unwrap(),
+    );
 
     (pixel[0], pixel[1], pixel[2])
 }
