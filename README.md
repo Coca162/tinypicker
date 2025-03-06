@@ -5,8 +5,6 @@ When you pick a color it will both display the rgb hex of the color and put it i
 
 You can install it by running `cargo install tinypicker`
 
-I personally use it as a shortcut (Win+Shift+C) so I can use it as quickly as possible.
-
 ## Platform support:
 - [x] Windows
 - [x] MacOS
@@ -18,3 +16,9 @@ I personally use it as a shortcut (Win+Shift+C) so I can use it as quickly as po
 Mouse Tracking:
 - [device_query](https://crates.io/crates/device_query) (default)
 - [mouce](https://crates.io/crates/mouce)
+
+# Changelog
+
+## 3.0
+
+Updated dependencies and turned off tty colors when not being displayed in terminal directly.

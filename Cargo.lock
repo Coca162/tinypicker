@@ -821,7 +821,7 @@ dependencies = [
 
 [[package]]
 name = "tinypicker"
-version = "0.2.3"
+version = "0.3.0"
 dependencies = [
  "copypasta-ext",
  "device_query",
