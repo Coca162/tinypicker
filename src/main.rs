@@ -12,6 +12,7 @@ use {
     mouce::{
         common::{MouseButton, MouseEvent},
         Mouse,
+        MouseActions,
     },
     std::sync::mpsc,
 };
