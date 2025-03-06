@@ -3,8 +3,7 @@
 use copypasta_ext::prelude::ClipboardProvider;
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
-use image::ImageFormat;
-use screenshots::Screen;
+use xcap::Monitor;
 use std::io::Write;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 #[cfg(feature = "mouce")]
@@ -12,6 +11,7 @@ use {
     mouce::{
         common::{MouseButton, MouseEvent},
         Mouse,
+        MouseActions,
     },
     std::sync::mpsc,
 };
@@ -73,15 +73,11 @@ fn request_pixel_position() -> Option<(i32, i32)> {
 }
 
 fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
-    let screen = Screen::from_point(x, y).unwrap();
+    let screen = Monitor::from_point(x, y).unwrap();
 
-    let (x, y) = (x - screen.display_info.x, y - screen.display_info.y);
+    let screenshot = screen.capture_image().unwrap();
 
-    let screenshot = screen.capture_area(x, y, 1, 1).unwrap();
-
-    let image = image::load_from_memory_with_format(screenshot.buffer(), ImageFormat::Png).unwrap();
-
-    let pixel = image.as_rgba8().unwrap().pixels().next().unwrap().0;
+    let pixel = screenshot.get_pixel(x.try_into().unwrap(), y.try_into().unwrap());
 
     (pixel[0], pixel[1], pixel[2])
 }

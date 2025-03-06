@@ -12,12 +12,12 @@ description = " A simple color picker made in rust for the CLI!"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-image = { version = "0.24.5", default-features = false, features = ["png"] }
-screenshots = "0.5.2"
-device_query = { version = "1.1.2", optional = true }
+image = { version = "0.25", default-features = false, features = ["png"] }
+device_query = { version = "3", optional = true }
 mouce = { version = "0.2.41", optional = true }
 termcolor = "1.2.0"
 copypasta-ext = { version = "0.4.4", default-features = false, features = ["x11-fork", "x11-bin"] }
+xcap = "0.4.0"
 
 [features]
 default = ["device_query"]
