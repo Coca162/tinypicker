@@ -1,17 +1,15 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery)]
 
-use copypasta_ext::prelude::ClipboardProvider;
 #[cfg(feature = "device_query")]
 use device_query::{DeviceQuery, DeviceState, MouseState};
-use xcap::Monitor;
-use std::io::Write;
+use std::io::{stdout, IsTerminal, Write};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use xcap::Monitor;
 #[cfg(feature = "mouce")]
 use {
     mouce::{
         common::{MouseButton, MouseEvent},
-        Mouse,
-        MouseActions,
+        Mouse, MouseActions,
     },
     std::sync::mpsc,
 };
@@ -26,9 +24,13 @@ fn main() {
 
     let rgb_hex = format!("#{r:02X}{g:02X}{b:02X}");
 
-    print_result((r, g, b), &rgb_hex);
+    if stdout().is_terminal() {
+        print_color_result((r, g, b), &rgb_hex);
+    } else {
+        println!("{rgb_hex}");
+    }
 
-    send_to_clibpoard(&rgb_hex);
+    send_to_clibpoard(rgb_hex);
 }
 
 #[cfg(feature = "device_query")]
@@ -82,7 +84,7 @@ fn get_pixel_colour((x, y): (i32, i32)) -> (u8, u8, u8) {
     (pixel[0], pixel[1], pixel[2])
 }
 
-fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
+fn print_color_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     stdout
         .set_color(
@@ -93,22 +95,20 @@ fn print_result((r, g, b): (u8, u8, u8), rgb_hex: &str) {
         .unwrap();
 
     stdout.write_all(rgb_hex.as_bytes()).unwrap();
+    stdout.write_all(b"\n").unwrap();
 
     stdout.reset().unwrap();
 
     stdout.flush().unwrap();
 }
 
-fn send_to_clibpoard(rgb_hex: &str) {
+fn send_to_clibpoard(rgb_hex: String) {
     #[cfg(unix)]
     {
-        use copypasta_ext::{
-            x11_bin::ClipboardContext as BinClipboardContext,
-            x11_fork::ClipboardContext as ForkClipboardContext,
-        };
+        use copypasta_ext::{prelude::ClipboardProvider, x11_bin, x11_fork};
 
         let bin_result =
-            BinClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+            x11_bin::ClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
 
         if let Err(err) = bin_result {
             eprintln!("{err} Could not use xclip, attempting fork");
@@ -117,7 +117,7 @@ fn send_to_clibpoard(rgb_hex: &str) {
         }
 
         let fork_result =
-            ForkClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
+            x11_fork::ClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex));
 
         if let Err(err) = fork_result {
             eprintln!("Fork clipboard method failed: {err}");
@@ -127,5 +127,7 @@ fn send_to_clibpoard(rgb_hex: &str) {
     #[cfg(not(unix))]
     copypasta_ext::display::DisplayServer::select()
         .try_context()
-        .and_then(|mut x| x.set_contents(rgb_hex.to_string()))
+        .map(|mut x| x.set_contents(rgb_hex))
+        .expect("Could not find display server")
+        .expect("Failed to set clipboard content");
 }
