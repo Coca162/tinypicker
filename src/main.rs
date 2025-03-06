@@ -111,7 +111,7 @@ fn send_to_clibpoard(rgb_hex: String) {
             x11_bin::ClipboardContext::new().and_then(|mut x| x.set_contents(rgb_hex.to_string()));
 
         if let Err(err) = bin_result {
-            eprintln!("{err} Could not use xclip, attempting fork");
+            eprintln!("{err}\nUsing fork");
         } else {
             return;
         }
