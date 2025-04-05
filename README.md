@@ -23,6 +23,6 @@ Mouse Tracking:
 
 Fix multi-monitor color picks and follow `NO_COLOR` when set.
 
-## 0.3.1
+## 0.3.0
 
 Updated dependencies and turned off tty colors when not being displayed in terminal directly.
